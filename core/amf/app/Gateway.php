@@ -343,7 +343,21 @@ class Gateway {
 		$this->_charsetMethod = $method;
 		$this->_charsetPhp = $php;
 		$this->_charsetSql = $sql;
-	} 
+	}
+	
+	/**
+	 * disableStandalonePlayer will exit the script (die) if the standalone
+	 * player is sees in the User-Agent signature
+	 * 
+	 * @param bool $bool Wheather to disable the Standalone player. Ie desktop player.
+	 */
+	function disableStandalonePlayer($value = true) {
+		if($value && $_SERVER['HTTP_USER_AGENT'] == "Shockwave Flash")
+		{
+			trigger_error("Standalone Flash player disabled. Update gateway.php to allow these connections", E_USER_ERROR);
+			die();
+		}
+	}
 	
 	/**
 	 * disableTrace will ignore any calls to NetDebug::trace
@@ -361,6 +375,7 @@ class Gateway {
 	{
 		$GLOBALS['amfphp']['native'] = false;
 	}
+
 	
 	/**
 	 * Log incoming messages to the specified folder

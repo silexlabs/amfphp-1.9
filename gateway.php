@@ -103,7 +103,7 @@
 	//You can set this constant appropriately to disable traces and debugging headers
 	//You will also have the constant available in your classes, for changing
 	//the mysql server info for example
-	define("PRODUCTION_SERVER", false);
+	define("PRODUCTION_SERVER", true);
 	
 	//Include things that need to be global, for integrating with other frameworks
 	include "globals.php";
@@ -133,6 +133,8 @@
 	{
 		//Disable profiling, remote tracing, and service browser
 		$gateway->disableDebug();
+		// Keep the Flash/Flex IDE player from connecting to the gateway. Used for security to stop remote connections. 
+		$gateway->disableStandalonePlayer();
 	}
 	
 	//If you are running into low-level issues with corrupt messages and 
