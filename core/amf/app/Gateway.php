@@ -306,8 +306,8 @@ class Gateway {
 	 * @param string $path The path the the service class directory
 	 */
 	function setClassMappingsPath($value) {
-		$path = realpath($value . '/') . '/';
-		$GLOBALS['amfphp']['customMappingsPath'] = $path;
+		$path = realpath($value . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+  		$GLOBALS['amfphp']['customMappingsPath'] = $path;
 	}
 	
 	/**

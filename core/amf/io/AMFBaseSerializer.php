@@ -307,8 +307,13 @@ class AMFBaseSerializer {
 		        $basePath = getcwd();
 		
 		    // Handle OS filesystem differences
-		    if( DIRECTORY_SEPARATOR == "\\" && ( strpos( $basePath, DIRECTORY_SEPARATOR ) === false ) )
+		    if( DIRECTORY_SEPARATOR == "\\")
 		        $basePath = str_replace( "/", DIRECTORY_SEPARATOR, $basePath );
+			else if( DIRECTORY_SEPARATOR == "/")
+				$basePath = str_replace( "\\", DIRECTORY_SEPARATOR, $basePath );
+
+ 
+		        
 		    
 		    if(strpos($fileName, $basePath) === FALSE)
 		    {
