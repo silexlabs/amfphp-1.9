@@ -34,20 +34,26 @@
 					 height="100%" 
 					 id="methodTree" 
 					 openDuration="0"
-					 change="onMethodTreeChange()"
+					 change="onServiceChange()"
 					 />
 		</mx:VBox>
-		<mx:Panel id="rightPanel" visible="false" title="{'Exploring ' + _currentService.label}" height="100%" borderThickness="3" paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5" borderThicknessBottom="3" borderThicknessLeft="3" borderThicknessRight="3" borderThicknessTop="3">
-			<mx:VDividedBox label="Test" width="100%" height="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+		<mx:Panel id="rightPanel" visible="false" title="{'Exploring ' + _currentService.label}" 
+			height="100%" borderThickness="3" 
+			paddingLeft="5" paddingRight="5" paddingBottom="5" paddingTop="5" 
+			borderThicknessBottom="3" borderThicknessLeft="3" borderThicknessRight="3" borderThicknessTop="3">
+			<mx:VDividedBox label="Test" width="100%" height="100%" 
+				paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
 				<mx:TabNavigator width="100%" height="100%" historyManagementEnabled="false">
 					
 					<mx:VBox width="100%" label="Test">
-						<mx:LinkBar id="methodLinks" itemClick="_currentMethod = _methods[event.item.data]; _currentMethodName = event.item.label; enableLinks();" fontWeight="normal" horizontalGap="0"/>
+						<mx:LinkBar id="methodLinks" itemClick="onMethodChange(event)"
+							 fontWeight="normal" horizontalGap="0"/>
 						<mx:VBox width="100%">
 							<mx:Form width="100%"  id="form1">
 								<mx:Text fontWeight="bold" htmlText="{'Method: ' + _currentMethodName}" width="100%"/>
 								<mx:Text htmlText="{_currentMethod.description}" width="100%"/>
-								<mx:Repeater width="100%" recycleChildren="false" id="args" dataProvider="{_currentMethod.arguments}">
+								<mx:Repeater width="100%" recycleChildren="false" id="args" 
+									dataProvider="{_currentMethod.arguments}">
 									<mx:FormItem width="100%" label="{args.currentItem != null ? args.currentItem : ''}">
 										<mx:TextInput id="arg" width="100%"/>
 									</mx:FormItem>
@@ -61,15 +67,18 @@
 					</mx:VBox>
 				
 				</mx:TabNavigator>
-				<mx:TabNavigator creationPolicy="all" id="output" width="100%" paddingTop="0" historyManagementEnabled="false" height="0" visible="false">
+				<mx:TabNavigator creationPolicy="all" id="output" width="100%" paddingTop="0" 
+					historyManagementEnabled="false" height="0" visible="false">
 					<mx:VBox label="Results" height="100%">
-						<mx:TextArea editable="false" focusEnabled="false" height="100%" width="100%" id="resultsText" borderThickness="0"  borderStyle="none"/>
+						<mx:TextArea editable="false" focusEnabled="false" height="100%" width="100%" 
+							id="resultsText" borderThickness="0"  borderStyle="none"/>
 					</mx:VBox>
 					<mx:VBox label="RecordSet view" width="100%" height="100%" borderThickness="0">
 						<mx:DataGrid width="100%" height="100%" borderStyle="none" id="resultsDg"></mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Trace" width="100%" height="100%">
-						<mx:TextArea editable="false" focusEnabled="false" x="305" y="220" width="100%" height="100%" text="Not yet implemented." borderThickness="0" borderStyle="none"/>
+						<mx:TextArea editable="false" focusEnabled="false" x="305" y="220" width="100%" 
+							height="100%" text="Not yet implemented." borderThickness="0" borderStyle="none"/>
 					</mx:VBox>
 					<mx:VBox label="Info" width="100%" height="100%">
 						<mx:Text text="Text" id="infoText"/>
@@ -81,6 +90,7 @@
 	</mx:HDividedBox>
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ItemClickEvent;
 			import mx.core.UIComponent;
 			import mx.core.Container;
 			import mx.controls.dataGridClasses.DataGridColumn;
@@ -113,14 +123,7 @@
 				_sro.addEventListener(FaultEvent.FAULT, onFault);
 			}
 			
-			private function onMethodTreeChange():void{
-				if((methodTree.selectedItem.children is Array)){
-					return;
-				} 
-				_currentService = methodTree.selectedItem; 
-				ro.describeService(methodTree.selectedItem);		
-			}
-			
+
 			private function setEndPoint():void{
 				var url:String = Application.application.url;
 				if(url.indexOf('http') != -1)
@@ -222,6 +225,20 @@
 			    	var curItem:UIComponent = methodLinks.getChildAt(i) as UIComponent;
 			    	curItem.enabled = i == methodLinks.selectedIndex ? false : true;
 			  	}
+			}
+			
+			private function onServiceChange():void{
+				if((methodTree.selectedItem.children is Array)){
+					return;
+				} 
+				_currentService = methodTree.selectedItem; 
+				ro.describeService(methodTree.selectedItem);		
+			}
+			
+			private function onMethodChange(event:ItemClickEvent):void{
+				_currentMethod = _methods[event.item.data]; 
+				_currentMethodName = event.item.label; 
+				enableLinks();				
 			}
 		]]>
 	</mx:Script>
