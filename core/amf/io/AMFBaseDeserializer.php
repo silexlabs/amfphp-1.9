@@ -211,6 +211,7 @@ class AMFBaseDeserializer {
 			exit();
 		}
 		$this->header_count = $this->readInt(); //  find the total number of header elements
+		
 		while ($this->header_count--) { // loop over all of the header elements
 			$name = $this->readUTF();
 			$required = $this->readByte() == 1; // find the must understand flag

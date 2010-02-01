@@ -635,7 +635,11 @@ class AMFDeserializer extends AMFBaseDeserializer {
      */
     function readBuffer($len)
     {
-    	$data = substr($this->raw_data,$this->current_byte,$len);
+    	$data = "";
+    	for($i = 0; $i < $len; $i++)
+    	{
+    		$data .= $this->raw_data{$i + $this->current_byte};
+    	}
     	$this->current_byte += $len;
     	return $data;
     }

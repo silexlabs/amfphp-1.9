@@ -42,6 +42,7 @@ require_once(AMFPHP_BASE . "shared/util/CharsetHandler.php");
 require_once(AMFPHP_BASE . "shared/util/NetDebug.php");
 require_once(AMFPHP_BASE . "shared/util/Headers.php");
 require_once(AMFPHP_BASE . "shared/exception/MessageException.php");
+require_once(AMFPHP_BASE . "shared/util/MessageHeader.php");
 require_once(AMFPHP_BASE . "shared/app/BasicActions.php");
 require_once(AMFPHP_BASE . "amf/util/AMFObject.php");
 require_once(AMFPHP_BASE . "amf/util/WrapperClasses.php");
@@ -190,6 +191,11 @@ class Gateway {
 			//of this for FlashComm support
 			header(AMFPHP_CONTENT_TYPE); // define the proper header
 			
+			if(Headers::getHeader('Credentials') == true)
+			{
+				$header = Headers::getHeader('Credentials');
+			}
+			
 			if(Headers::getHeader('serviceBrowser') == true)
 			{
 				//Add the total time header
@@ -306,8 +312,8 @@ class Gateway {
 	 * @param string $path The path the the service class directory
 	 */
 	function setClassMappingsPath($value) {
-		$path = realpath($value . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-  		$GLOBALS['amfphp']['customMappingsPath'] = $path;
+		$path = realpath($value . '/') . '/';
+		$GLOBALS['amfphp']['customMappingsPath'] = $path;
 	}
 	
 	/**

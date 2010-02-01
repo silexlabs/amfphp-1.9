@@ -96,7 +96,7 @@ function authenticationFilter (&$amf) {
 		$amf->addOutgoingHeader($outHeader);
 	}
 
-	$sessionName = session_name();
+	$sessionName = @ini_get('session.name');
 	if($sessionName == "" || $sessionName == NULL)
 	{
 		//Fix for godaddy not allowing ini_get

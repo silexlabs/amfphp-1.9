@@ -26,7 +26,8 @@ class AMFSerializer extends AMFBaseSerializer {
    var $storedDefinitions = 0;
    var $storedStrings = array();
    var $outBuffer;
-   var $encounteredStrings = array();
+   // changed to integer, used to be array but was causing errors
+   var $encounteredStrings = 0;
    
    var $native = false;
 
@@ -567,7 +568,7 @@ class AMFSerializer extends AMFBaseSerializer {
 			$this->writeAmf3Data($d);
 			return;
 		}
-		elseif (is_array($d))
+		elseif (is_array($d)) 
 		{ // array
 			$this->writeArray($d);
 			return;
@@ -605,8 +606,7 @@ class AMFSerializer extends AMFBaseSerializer {
 				$this->writeAnonymousObject($d);
 				return;
 			}
-			//Fix for PHP5 overriden ArrayAccess and ArrayObjects with an explcit type
-			elseif( (is_a($d, 'ArrayAccess') || is_a($d, 'ArrayObject')) && !isset($d->_explicitType))
+			elseif(is_a($d, 'ArrayAccess') || is_a($d, 'ArrayObject'))
 			{
 				$this->writeArray($d);
 				return;
@@ -623,9 +623,6 @@ class AMFSerializer extends AMFBaseSerializer {
 		}
 		
 		switch ($type) {
-			case "mysql link" :
-				$this->writeString($d);
-				break;
 			case "__RECORDSET__" :
 				$classname = $subtype . "Adapter"; // full class name
 				$includeFile = include_once(AMFPHP_BASE . "shared/adapters/" . $classname . ".php"); // try to load the recordset library from the sql folder
@@ -676,7 +673,7 @@ class AMFSerializer extends AMFBaseSerializer {
 			$this->writeAmf3Null();
 			return;
 		} 
-		elseif (is_array($d) && !isset($d->_explicitType)) 
+		elseif (is_array($d)) 
 		{ // array
 			$this->writeAmf3Array($d);
 			return;
@@ -714,8 +711,7 @@ class AMFSerializer extends AMFBaseSerializer {
 				$this->writeAmf3ByteArray($d->data);
 				return;
 			}
-			// Fix for PHP5 overriden ArrayAccess and ArrayObjects with an explcit type
-			elseif( (is_a($d, 'ArrayAccess') || is_a($d, 'ArrayObject')) && !isset($d->_explicitType))
+			elseif(is_a($d, 'ArrayAccess') || is_a($d, 'ArrayObject'))
 			{
 				$this->writeAmf3Array($d, true);
 				return;
@@ -992,26 +988,7 @@ class AMFSerializer extends AMFBaseSerializer {
 	{
 		$this->writeByte(0x0C);
 		$this->writeAmf3String($d, true);
-		$this->writeAmf3ByteArrayBody($d);
 	}
-	
-	function writeAmf3ByteArrayBody($d)
-	{
-		if( ($key = patched_array_search($d, $this->storedObjects, TRUE)) === FALSE && $key === FALSE )
-		{
-			if(count($this->storedObjects) < MAX_STORED_OBJECTS)
-			{
-				$this->storedObjects[] = & $d;
-			}
-			$this->storedDefinitions++;
-			$obj_length = strlen( $d );
-			$this->writeAmf3Int( $obj_length << 1 | 0x01 );
-			$this->outBuffer .= $d;
-		} else {
-			$handle = $key << 1;
-			$this->writeAmf3Int($handle);
-		}
-	} 
 
 	function writeAmf3Object($d)
 	{
@@ -1066,4 +1043,7 @@ class AMFSerializer extends AMFBaseSerializer {
 		}
 	}
 }
+
+
+
 ?>

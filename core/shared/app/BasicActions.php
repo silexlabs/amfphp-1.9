@@ -113,10 +113,17 @@ function securityAction (&$amfbody) {
 		
 		if (method_exists($classConstruct, "beforeFilter")) {			
 			//Pass throught the executive
+			
+			if(Headers::getHeader('Credentials') == true)
+			{
+				$header = Headers::getHeader('Credentials');
+			}
+			
+			//authenticationFilter($amf)
 			$allow = Executive::doMethodCall($amfbody, 
 										$classConstruct, 
 										'beforeFilter', 
-										array($methodName));
+										array($methodName, $header["userid"], $header["password"]));
 			if ($allow === '__amfphp_error' || $allow === false) {
 				$ex = new MessageException(E_USER_ERROR, "Method access blocked by beforeFilter in " . $className . " class", __FILE__, __LINE__, "AMFPHP_AUTHENTICATE_ERROR");
 				MessageException::throwException($amfbody, $ex);

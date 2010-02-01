@@ -502,9 +502,9 @@ class MethodTable
 		$comment = str_replace("*/", "", $comment);
 		$comment = str_replace("*", "", $comment);
 		$comment = str_replace("\r", "", trim($comment));
-		$comment = preg_replace("{\n[ \t]+}", "\n", trim($comment));
+		$comment = eregi_replace("\n[ \t]+", "\n", trim($comment));
 		$comment = str_replace("\n", "\\n", trim($comment));
-		$comment = preg_replace("{[\t ]+}", " ", trim($comment));
+		$comment = eregi_replace("[\t ]+", " ", trim($comment));
 		
 		$comment = str_replace("\"", "\\\"", $comment);
 		return $comment;

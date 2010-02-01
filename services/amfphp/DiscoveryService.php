@@ -5,7 +5,7 @@ include_once(AMFPHP_BASE . "shared/util/MethodTable.php");
  * Remove from production servers
  */
 class DiscoveryService
-{
+{	
 	/**
 	 * Get the list of services
 	 * @returns An array of array ready to be bound to a Tree
@@ -37,6 +37,7 @@ class DiscoveryService
 				$out[] = array("label" => $key, "children" => $children, "open" => true);
 			}
 		}
+		
 		return $out;
 	}
 	
@@ -54,6 +55,19 @@ class DiscoveryService
 		
 		$methodTable = MethodTable::create($this->_path . $path . $className . '.php', NULL, $classComment);
 		return array($methodTable, $classComment);
+	}
+	
+	/**
+	 * Get the details of the server on which AMFPHP is running
+	 */
+	function getServerDetails()
+	{
+		$details = array();
+		$details["software"] = $_SERVER["SERVER_SOFTWARE"];
+		$details["address"] = gethostbyname($_SERVER["SERVER_ADDR"]);
+		$details["userAgent"] = $_SERVER["HTTP_USER_AGENT"];
+		$details["name"] = $_SERVER["SERVER_NAME"];
+		return $details;
 	}
 	
 	function _listServices($dir = "", $suffix = "")
