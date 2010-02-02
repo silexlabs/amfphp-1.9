@@ -1198,21 +1198,21 @@ Window
 	fontFamily: "Bitstream Vera Sans Mono";
 	fontWeight: normal;
 	fontStyle: normal;
-	src: local("Bitstream Vera Sans Mono");
+	src: url("assets/fonts/VeraMono.ttf");
 }
 @font-face
 {
 	fontFamily: "Bitstream Vera Sans Mono";
 	fontWeight: bold;
 	fontStyle: normal;
-	src: local("Bitstream Vera Sans Mono");
+	src: url("assets/fonts/VeraMoBd.ttf");
 }
 @font-face
 {
 	fontFamily: "Bitstream Vera Sans Mono";
 	fontWeight: normal;
 	fontStyle: italic;
-	src: local("Bitstream Vera Sans Mono");
+	src: url("assets/fonts/VeraMoIt.ttf");
 }
 .dataGridVerticalScrollBar
 {
