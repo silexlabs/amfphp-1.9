@@ -37,5 +37,4 @@ class zendrowsetAdapter extends RecordSetAdapter
 		}
 	}
 }
-?
->
+?>
