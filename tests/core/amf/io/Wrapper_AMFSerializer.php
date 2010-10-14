@@ -13,6 +13,12 @@ require_once AMFPHP_BASE . 'amf/io/AMFSerializer.php';
 
 class Wrapper_AMFSerializer extends AMFSerializer
 {
+    public function writeAmf3Data(&$d)
+    {
+        return parent::writeAmf3Data($d);
+    }
+
+
     public function writeAmf3String($d, $raw = FALSE)
     {
         return parent::writeAmf3String($d, $raw);
