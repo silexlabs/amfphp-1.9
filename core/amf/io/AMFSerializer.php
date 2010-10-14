@@ -19,16 +19,30 @@ include_once(AMFPHP_BASE . "amf/io/AMFBaseSerializer.php");
 class AMFSerializer extends AMFBaseSerializer {
 
 	/**
+	 * @todo Why are the private members defined again?
+	 * They are available in the base class already.
+	 * Once there are enough tests, simply remove them here,
+	 * use the ones from the base class and check if it
+	 * still works as expected.
+	 */
+
+	/**
 	 * Classes that are serialized as recordsets
-	 */                         
+	 */
    var $amf0StoredObjects = array();
    var $storedObjects = array();
    var $storedDefinitions = 0;
    var $storedStrings = array();
    var $outBuffer;
-   // changed to integer, used to be array but was causing errors
-   var $encounteredStrings = 0;
-   
+
+	/**
+	 * Count the number of unique sent strings.
+	 * The number is used as reference in case an already
+	 * sent string should be sent again.
+	 */
+
+	private $encounteredStrings = 0;
+
    var $native = false;
 
 	/**
@@ -46,10 +60,10 @@ class AMFSerializer extends AMFBaseSerializer {
 	 * 
 	 * @param bool $d The boolean value
 	 */
-	function writeBoolean($d) {
-		$this->writeByte(1); // write the boolean flag
-		$this->writeByte($d); // write  the boolean byte
-	} 
+	protected function writeBoolean($d) {
+		$this->writeByte(1); // write the "boolean-marker"
+		$this->writeByte($d); // write the boolean byte (0 = FALSE; rest = TRUE)
+	}
 
 	/**
 	 * writeString writes the string code (0x02) and the UTF8 encoded
@@ -794,17 +808,38 @@ class AMFSerializer extends AMFBaseSerializer {
 		}
 	}
 
-	function writeAmf3String($d, $raw = false)
+
+	/**
+	 * Write a string. Strings are stored in a cache and in case the same string
+	 * is written again, a reference to the string is sent instead of the string itself.
+	 *
+	 * @param string $d the string to send
+	 *
+	 * @param bool $raw
+	 *
+	 * @return The reference index inside the lookup table is returned. In case of an empty
+	 * string which is sent in a special way, NULL is returned.
+	 */
+
+	protected function writeAmf3String($d, $raw = false)
 	{
 		if( $d == "" )
 		{
 			//Write 0x01 to specify the empty ctring
 			$this->outBuffer .= "\1";
+			return NULL;
 		}
 		else
 		{
 			if( !isset($this->storedStrings[$d]))
 			{
+
+				/**
+				 * @todo Properly support strings with a length larger than 64
+				 * characters. For those, U29-1 is not enough anymore and
+				 * U29-2, U29-3 or U29-4 is needed!
+				 */
+
 				if(strlen($d) < 64)
 				{
 					$this->storedStrings[$d] = $this->encounteredStrings;
@@ -813,24 +848,22 @@ class AMFSerializer extends AMFBaseSerializer {
 				{
 					$d = $this->charsetHandler->transliterate($d);
 				}
-				
-				$handle = strlen($d);
-				$this->writeAmf3Int($handle*2 + 1);
+
+				$this->writeAmf3Int(strlen($d) << 1 | 1); // U29S-value
 				$this->outBuffer .= $d;
-				$this->encounteredStrings++;
-				return $this->encounteredStrings - 1;
+				return $this->encounteredStrings++; // return the "previous" value
 			}
 			else
 			{
 				$key = $this->storedStrings[$d];
-				$handle = $key << 1;
-				$this->writeAmf3Int($handle);
+				$this->writeAmf3Int($key << 1); // U29S-ref
 				return $key;
 			}
 		}
 	}
 
-	function writeAmf3Array($d, $arrayCollectionable = false)
+
+	protected function writeAmf3Array(array $d, $arrayCollectionable = false)
 	{
 		//Circular referencing is disabled in arrays
 		//Because if the array contains only primitive values,
@@ -853,8 +886,8 @@ class AMFSerializer extends AMFBaseSerializer {
 					$largestKey = max($largestKey, $key);
 				} else {
 					$string[$key] = $data; // The key is a property of an object
-				} 
-			} 
+				}
+			}
 			$num_count = count($numeric); // get the number of numeric keys
 			$str_count = count($string); // get the number of string keys
 

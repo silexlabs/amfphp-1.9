@@ -16,14 +16,21 @@ class AMFBaseSerializer {
 
 	/**
 	 * Classes that are serialized as recordsets
-	 */                         
+	 */
    var $amf0StoredObjects = array();
    var $storedObjects = array();
    var $storedDefinitions = 0;
    var $storedStrings = array();
    var $outBuffer;
-   var $encounteredStrings = 0;
-   
+
+	/**
+	 * Count the number of unique sent strings.
+	 * The number is used as reference in case an already
+	 * sent string should be sent again.
+	 */
+
+	private $encounteredStrings = 0;
+
    var $native = false;
 
 	/**
