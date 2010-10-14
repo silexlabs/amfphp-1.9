@@ -6,8 +6,10 @@ require_once dirname(__FILE__) . '/Wrapper_AMFSerializer.php';
 
 $oAMFSerializer = new Wrapper_AMFSerializer();
 
-// The empty string has a special encoding - Adobe calls it "UTF-8-empty".
+// The empty string has a special encoding (Adobe calls it "UTF-8-empty").
 // This method is not supposed to output the value type.
+
+// "UTF-8-empty" (0x01)
 
 $oAMFSerializer->writeAmf3String('', FALSE);
 
@@ -20,12 +22,12 @@ $oAMFSerializer = new Wrapper_AMFSerializer();
 // The string is seen for the first time. So no reference can be used.
 // This method is not supposed to output the value type.
 
-// The expected result is "U29S-value" plus the UTF-8 encoded string.
-// U29S-value: bit 0 set (non-referenced/literal string), then length (15 byte), plus the actual string
+// "U29S-value" (15 << 1 | 1 = 0x1f)
+// "This is a test!"
 
 $oAMFSerializer->writeAmf3String('This is a test!', FALSE);
 
-if ($oAMFSerializer->outBuffer !== pack('C', 15 * 2 + 1) . 'This is a test!') {
+if ($oAMFSerializer->outBuffer !== pack('C', 31) . 'This is a test!') {
     echo 'Failed at line ' . __LINE__ . '!' . "\n";
 }
 
@@ -35,13 +37,14 @@ $oAMFSerializer = new Wrapper_AMFSerializer();
 // the second time it should be added as reference.
 // This method is not supposed to output the value type.
 
-// The expected result is "U29S-value" plus the UTF-8 encoded string and then
-// "U29S-ref" with a reference to the string (lookup table index 0).
+// "U29S-value" (15 << 1 | 1 = 0x1f)
+// "This is a test!"
+// "U29S-ref" for lookup table index 0) (0 << 1 = 0x00)
 
 $oAMFSerializer->writeAmf3String('This is a test!', FALSE);
 $oAMFSerializer->writeAmf3String('This is a test!', FALSE);
 
-if ($oAMFSerializer->outBuffer !== pack('C', 15 * 2 + 1) . 'This is a test!' . pack('C', 0 * 2 + 0)) {
+if ($oAMFSerializer->outBuffer !== pack('C', 31) . 'This is a test!' . pack('C', 0)) {
     echo 'Failed at line ' . __LINE__ . '!' . "\n";
 }
 ?>
