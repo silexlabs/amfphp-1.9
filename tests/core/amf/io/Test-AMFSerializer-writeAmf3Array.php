@@ -30,7 +30,7 @@ if ($sBuffer !== pack('C3', 9, 1, 1)) {
 
 $oAMFSerializer = new Wrapper_AMFSerializer();
 
-// Serialize an array with 0-based integer keys.
+// Serialize an array with 0-based integer keys (Adobe calls it "dense array").
 // This method is supposed to output the value type.
 
 // "array_marker" (0x09)
