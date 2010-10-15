@@ -25,7 +25,7 @@ class Wrapper_AMFSerializer extends AMFSerializer
     }
 
 
-    /* public */ function writeAmf3Array(array $d, $arrayCollectionable = FALSE)
+    /* public */ function writeAmf3Array(/* array */ $d, $arrayCollectionable = FALSE)
     {
         return parent::writeAmf3Array($d, $arrayCollectionable);
     }
