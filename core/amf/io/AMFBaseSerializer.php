@@ -29,7 +29,7 @@ class AMFBaseSerializer {
 	 * sent string should be sent again.
 	 */
 
-	private $encounteredStrings = 0;
+	/* private */ var $encounteredStrings = 0;
 
    var $native = false;
 

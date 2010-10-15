@@ -41,7 +41,7 @@ class AMFSerializer extends AMFBaseSerializer {
 	 * sent string should be sent again.
 	 */
 
-	private $encounteredStrings = 0;
+	/* private */ var $encounteredStrings = 0;
 
    var $native = false;
 
@@ -55,15 +55,18 @@ class AMFSerializer extends AMFBaseSerializer {
 		AMFBaseSerializer::AMFBaseSerializer();
 	} 
 
+
 	/**
 	 * writeBoolean writes the boolean code (0x01) and the data to the output stream
 	 * 
 	 * @param bool $d The boolean value
 	 */
-	protected function writeBoolean($d) {
+
+	/* protected */ function writeBoolean($d) {
 		$this->writeByte(1); // write the "boolean-marker"
 		$this->writeByte($d); // write the boolean byte (0 = FALSE; rest = TRUE)
 	}
+
 
 	/**
 	 * writeString writes the string code (0x02) and the UTF8 encoded
@@ -657,8 +660,14 @@ class AMFSerializer extends AMFBaseSerializer {
 	/********************************************************************************
 	 *                             AMF3 related code
 	 *******************************************************************************/
-	
-	function writeAmf3Data(& $d)
+
+	/**
+	 * @todo Is the reference still needed? PHP4 needed it for objects, but PHP5 always
+	 * passes objects by reference. And PHP5 uses a copy-on-write approach, so that all
+	 * values are passed at "reference", in case no changes take place.
+	 */
+
+	/* protected */ function writeAmf3Data(& $d)
 	{
 		if (is_int($d)) 
 		{ //int
@@ -783,8 +792,20 @@ class AMFSerializer extends AMFBaseSerializer {
 	{
 		$this->outBuffer .= $d ? "\3" : "\2";
 	}
-	
-	function writeAmf3Int($d)
+
+
+	/**
+	 * Write an unsigned integer.
+	 *
+	 * @note The limit imposed by AMF3 is 29 bit. So in case the given integer is longer than 29 bit,
+	 * this method cannot be used as it will (silently) fail!
+	 *
+	 * @param int $d the integer to serialise
+	 *
+	 * @return nothing
+	 */
+
+	/* protected */ function writeAmf3Int($d)
 	{
 		//Sign contraction - the high order bit of the resulting value must match every bit removed from the number
 		//Clear 3 bits 
@@ -813,6 +834,8 @@ class AMFSerializer extends AMFBaseSerializer {
 	 * Write a string. Strings are stored in a cache and in case the same string
 	 * is written again, a reference to the string is sent instead of the string itself.
 	 *
+	 * @note Sending strings larger than 268435455 (2^28-1 byte) will (silently) fail!
+	 *
 	 * @param string $d the string to send
 	 *
 	 * @param bool $raw
@@ -821,11 +844,11 @@ class AMFSerializer extends AMFBaseSerializer {
 	 * string which is sent in a special way, NULL is returned.
 	 */
 
-	protected function writeAmf3String($d, $raw = false)
+	/* protected */ function writeAmf3String($d, $raw = false)
 	{
 		if( $d == "" )
 		{
-			//Write 0x01 to specify the empty ctring
+			//Write 0x01 to specify the empty string ("UTF-8-empty")
 			$this->outBuffer .= "\1";
 			return NULL;
 		}
@@ -834,16 +857,27 @@ class AMFSerializer extends AMFBaseSerializer {
 			if( !isset($this->storedStrings[$d]))
 			{
 
-				/**
-				 * @todo Properly support strings with a length larger than 64
-				 * characters. For those, U29-1 is not enough anymore and
-				 * U29-2, U29-3 or U29-4 is needed!
-				 */
+				// The string is not yet available in the reference lookup table.
+				// If the string is shorter than 64 byte, add it to the lookup cache;
+				// if it is longer, do not store it locally. This way, it cannot be
+				// referenced once it is encountered again. However, the AMF client
+				// builds the reference lookup table as well, so in all cases this
+				// string must increment the reference lookup table index.
+
+				// The whole purpose of not storing long strings in PHP is to
+				// save memory (in PHP script), as long strings are likely not to occur again.
 
 				if(strlen($d) < 64)
 				{
 					$this->storedStrings[$d] = $this->encounteredStrings;
 				}
+
+				// In case transliteration should take place, the original
+				// string is stored in the reference lookup table, but the
+				// transliterated string is sent. This is no issue as further
+				// occurrences of the to be transliterated string are sent
+				// as references.
+
 				if(!$raw)
 				{
 					$d = $this->charsetHandler->transliterate($d);
@@ -863,7 +897,7 @@ class AMFSerializer extends AMFBaseSerializer {
 	}
 
 
-	protected function writeAmf3Array(array $d, $arrayCollectionable = false)
+	/* protected */ function writeAmf3Array(array $d, $arrayCollectionable = false)
 	{
 		//Circular referencing is disabled in arrays
 		//Because if the array contains only primitive values,
