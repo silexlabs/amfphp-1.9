@@ -140,7 +140,8 @@ package org.amfphp.utils
 			data.writeByte(0x00);							
 			data.writeByte(0x02);							// Set the number of headers
 
-			createCredentialsHeader(data);
+            // FIX: Removed arbitrary credentials header creation - code left in by accident
+			//createCredentialsHeader(data);
 
 			//Write the name
 			data.writeByte(0x00);
