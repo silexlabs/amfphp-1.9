@@ -350,14 +350,17 @@ class AMFDeserializer extends AMFBaseDeserializer {
 			default: trigger_error("undefined Amf3 type encountered: " . $type, E_USER_ERROR);
 		}
 	}
-	
-	/// <summary>
-	/// Handle decoding of the variable-length representation
-	/// which gives seven bits of value per serialized byte by using the high-order bit 
-	/// of each byte as a continuation flag.
-	/// </summary>
-	/// <returns></returns>
-	function readAmf3Int()
+
+
+	/**
+	 * Handle decoding of the variable-length representation
+	 * which gives seven bits of value per serialized byte by using the high-order bit
+	 * of each byte as a continuation flag.
+	 *
+	 * @return read integer value
+	 */
+
+	/* protected */ function readAmf3Int()
 	{
 		$int = $this->readByte();
 		if($int < 128)
@@ -383,13 +386,16 @@ class AMFDeserializer extends AMFBaseDeserializer {
 					$int = ($int | ($tmp & 0x7f)) << 8;
 					$tmp = $this->readByte();
 					$int |= $tmp;
-					
-	            	// Check if the integer should be negative
-	            	if (($int & 0x10000000) != 0) {
-	            		// and extend the sign bit
-	            		$int |= 0xe0000000;
-	            	}
-	            	return $int;
+
+					// Integers in AMF3 are 29 bit. The MSB (of those 29 bit) is the sign bit.
+					// In order to properly convert that integer to a PHP integer - the system
+					// might be 32 bit, 64 bit, 128 bit or whatever - all higher bits need to
+					// be set.
+
+					if (($int & 0x10000000) !== 0) {
+						$int |= ~0x1fffffff; // extend the sign bit regardless of integer (bit) size
+					}
+					return $int;
 				}
 			}
 		}
