@@ -96,12 +96,18 @@ function authenticationFilter (&$amf) {
 		$amf->addOutgoingHeader($outHeader);
 	}
 
-	$sessionName = @ini_get('session.name');
+	/**
+	 * @todo Figure out when session_name() can actually return an empty string or NULL.
+	 * Maybe this is a relict from ini_get()?
+	 */
+
+	$sessionName = session_name();
 	if($sessionName == "" || $sessionName == NULL)
 	{
 		//Fix for godaddy not allowing ini_get
 		$sessionName = "PHPSESSID";
 	}
+
 	session_start();
 	$session_id = session_id();
 	if(!strpos($_SERVER['QUERY_STRING'], $session_id) !== FALSE)
