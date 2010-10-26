@@ -198,11 +198,11 @@ function debugFilter (&$amf) {
 function serializationFilter (&$amf) {
 	if($GLOBALS['amfphp']['native'] === true && function_exists('amf_decode'))
 	{
-		$serializer = new AMFBaseSerializer(); // Create a serailizer around the output stream
+		$serializer = new AMFBaseSerializer(); // Create a serializer around the output stream
 	}
 	else
 	{
-		$serializer = new AMFSerializer(); // Create a serailizer around the output stream
+		$serializer = new AMFSerializer(); // Create a serializer around the output stream
 	}
 	$result = $serializer->serialize($amf); // serialize the data
 	$amf->outputStream = $result;
