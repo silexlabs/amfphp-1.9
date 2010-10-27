@@ -762,7 +762,7 @@ class AMFSerializer extends AMFBaseSerializer {
 				
 				$this->writeRecordSet($recordSet); // writes the recordset formatted for Flash
 				break;
-			default: 
+			default:
 				// non of the above so lets assume its a Custom Class thats defined in the client
 				//$this->writeTypedObject($unsanitizedType, $d);
 				trigger_error("Unsupported Datatype: " . $type);
@@ -797,6 +797,10 @@ class AMFSerializer extends AMFBaseSerializer {
 	/**
 	 * Write an unsigned integer.
 	 *
+	 * @note There does not seem to be a way to distinguish between signed and unsigned integers.
+	 * This method just sends the lowest 29 bit as-is, and the receiver is responsible to interpret
+	 * the result as signed or unsigned based on some context.
+	 *
 	 * @note The limit imposed by AMF3 is 29 bit. So in case the given integer is longer than 29 bit,
 	 * this method cannot be used as it will (silently) fail!
 	 *
@@ -808,7 +812,7 @@ class AMFSerializer extends AMFBaseSerializer {
 	/* protected */ function writeAmf3Int($d)
 	{
 		//Sign contraction - the high order bit of the resulting value must match every bit removed from the number
-		//Clear 3 bits 
+		//Clear 3 bits
 		$d &= 0x1fffffff;
 		if($d < 0x80)
 		{
@@ -897,7 +901,7 @@ class AMFSerializer extends AMFBaseSerializer {
 	}
 
 
-	/* protected */ function writeAmf3Array(array $d, $arrayCollectionable = false)
+	/* protected */ function writeAmf3Array(/* array */ $d, $arrayCollectionable = false)
 	{
 		//Circular referencing is disabled in arrays
 		//Because if the array contains only primitive values,
@@ -910,8 +914,8 @@ class AMFSerializer extends AMFBaseSerializer {
 				$this->storedObjects[] = & $d;
 			}
 			
-			$numeric = array(); // holder to store the numeric keys
-			$string = array(); // holder to store the string keys
+			$numeric = array(); // holder to store the numeric keys >= 0
+			$string = array(); // holder to store the string keys; actually, non-integer or integer < 0 are stored
 			$len = count($d); // get the total number of entries for the array
 			$largestKey = -1;
 			foreach($d as $key => $data) { // loop over each element
@@ -961,7 +965,7 @@ class AMFSerializer extends AMFBaseSerializer {
 		//}
 	}
 	
-	function writeAmf3ObjectFromArray($d)
+	/* protected */ function writeAmf3ObjectFromArray(/* array */ $d)
 	{
 		//Type this as a dynamic object
 		$this->outBuffer .= "\12\13\1";
@@ -1110,7 +1114,4 @@ class AMFSerializer extends AMFBaseSerializer {
 		}
 	}
 }
-
-
-
 ?>
