@@ -350,21 +350,35 @@ class Gateway {
 		$this->_charsetPhp = $php;
 		$this->_charsetSql = $sql;
 	}
-	
+
+
 	/**
-	 * disableStandalonePlayer will exit the script (die) if the standalone
-	 * player is sees in the User-Agent signature
-	 * 
-	 * @param bool $bool Wheather to disable the Standalone player. Ie desktop player.
+	 * This method will exit the script (die) if the standalone
+	 * player is seen in the "User-Agent" signature.
+	 *
+	 * @note It just needs a HTTP propxy to remove or adjust the "User-Agent".
+	 * This check therefore just keeps the kiddies away. So if you are serious
+	 * about keeping certain clients away, come up with a better idea.
+	 *
+	 * @param bool $bool Wheather to disable the Standalone player, i.e. desktop player.
 	 */
-	function disableStandalonePlayer($value = true) {
-		if($value && $_SERVER['HTTP_USER_AGENT'] == "Shockwave Flash")
-		{
-			trigger_error("Standalone Flash player disabled. Update gateway.php to allow these connections", E_USER_ERROR);
-			die();
+
+	/* public */ function disableStandalonePlayer($value = true)
+	{
+		if ($value && isset($_SERVER['HTTP_USER_AGENT'])) {
+			foreach (array(
+				'^Shockwave Flash$',
+				'^Adobe Flash ' // not anchored to the end
+			) as $userAgentRegExp) {
+				if (preg_match('/' . $userAgentRegExp . '/', $_SERVER['HTTP_USER_AGENT']) === 1) {
+					trigger_error("Standalone Flash player disabled. Update gateway.php to allow these connections!", E_USER_ERROR);
+					die();
+				}
+			}
 		}
 	}
-	
+
+
 	/**
 	 * disableTrace will ignore any calls to NetDebug::trace
 	 * 
