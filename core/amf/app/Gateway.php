@@ -360,6 +360,9 @@ class Gateway {
 	 * This check therefore just keeps the kiddies away. So if you are serious
 	 * about keeping certain clients away, come up with a better idea.
 	 *
+	 * @todo This method should be moved into an authentification plugin,
+	 * which can reject/accept requests based on User-Agent.
+	 *
 	 * @param bool $bool Wheather to disable the Standalone player, i.e. desktop player.
 	 */
 
